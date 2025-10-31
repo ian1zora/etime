@@ -1,57 +1,33 @@
-const { Pedido, PedidoItem, Producto, Configuracion, sequelize } = require('../models');
+const { Configuracion } = require('../models');
 
-// tu createOrder ya existe; manténla (la dejé en tu código)
-
-exports.getOrdersForUser = async (req, res) => {
+//  Obtener todas las configuraciones (solo admin)
+exports.getAllSettings = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const pedidos = await Pedido.findAll({
-      where: { usuario_id: userId },
-      include: [{ model: PedidoItem }]
-    });
-    res.json(pedidos);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const configs = await Configuracion.findAll();
+    res.json(configs);
+  } catch (error) {
+    console.error('Error al obtener configuraciones:', error);
+    res.status(500).json({ message: 'Error al obtener configuraciones', error });
   }
 };
 
-exports.getAllOrders = async (req, res) => {
+//  Actualizar una configuración (por clave)
+exports.updateSetting = async (req, res) => {
   try {
-    const pedidos = await Pedido.findAll({ include: [{ model: PedidoItem }] });
-    res.json(pedidos);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+    const { clave } = req.params;
+    const { valor } = req.body;
 
-exports.getOrderById = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const pedido = await Pedido.findByPk(id, { include: [{ model: PedidoItem }] });
-    if (!pedido) return res.status(404).json({ message: 'Pedido no encontrado' });
-
-    // si no es admin, validar que el pedido pertenezca al usuario
-    if (req.user.role !== 'admin' && pedido.usuario_id !== req.user.id) {
-      return res.status(403).json({ message: 'Acceso denegado' });
+    const config = await Configuracion.findOne({ where: { clave } });
+    if (!config) {
+      return res.status(404).json({ message: 'Configuración no encontrada' });
     }
 
-    res.json(pedido);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+    config.valor = valor;
+    await config.save();
 
-exports.updateOrderStatus = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const { estado } = req.body;
-    const pedido = await Pedido.findByPk(id);
-    if (!pedido) return res.status(404).json({ message: 'Pedido no encontrado' });
-
-    pedido.estado = estado;
-    await pedido.save();
-    res.json({ message: 'Estado actualizado', pedido });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.json({ message: 'Configuración actualizada correctamente', config });
+  } catch (error) {
+    console.error('Error al actualizar configuración:', error);
+    res.status(500).json({ message: 'Error al actualizar configuración', error });
   }
 };

@@ -4,7 +4,7 @@ const cors = require('cors');
 const { sequelize } = require('./models');
 
 const authRoutes = require('./routes/authRoutes');
-const productRoutes = require('./routes/producRoutes'); // <- nombre correcto del archivo
+const productRoutes = require('./routes/productRoutes'); 
 const orderRoutes = require('./routes/orderRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const configRoutes = require('./routes/configRoutes');
@@ -36,3 +36,9 @@ sequelize.authenticate()
     app.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));
   })
   .catch(err => console.error('❌ Error de conexión DB:', err));
+
+  sequelize.sync({ alter: true })  
+  .then(() => {
+    console.log('✅ Tablas sincronizadas con la base de datos');
+  })
+  .catch(err => console.error('❌ Error al sincronizar tablas:', err));
