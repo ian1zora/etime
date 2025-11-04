@@ -3,9 +3,9 @@
 --  Proyecto eCommerce (Pedidos, Productos, Usuarios)
 -- ============================================================
 
-DROP DATABASE IF EXISTS etime_db;
-CREATE DATABASE etime_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE etime_db;
+DROP DATABASE IF EXISTS restaurante;
+CREATE DATABASE restaurante CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE restaurante;
 
 -- ============================================================
 --  TABLA: usuario
