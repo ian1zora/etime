@@ -145,6 +145,10 @@ VALUES ('admin', 'admin123', 'admin@etime.com', 'admin');
 INSERT INTO `configuracion` (`clave`, `valor`) VALUES
 ('max_items_por_persona', '4');
 
+INSERT INTO descuento (codigo, porcentaje, monto_fijo, activo)
+VALUES ('PROMO10', 10, NULL, true);
+
+
 -- ============================================================
 --  FIN DEL SCRIPT
 -- ============================================================
