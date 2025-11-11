@@ -1,7 +1,19 @@
 // Server/controllers/orderController.js
-const { Pedido, PedidoItem, Producto, Descuento, Configuracion, sequelize } = require('../models');
+const { Pedido, PedidoItem, Producto, Descuento, Configuracion, Usuario, sequelize } = require('../models');
 
-// Crear nuevo pedido
+const DEFAULT_MAX_PER_PERSON = 4;
+
+async function getConfigNumber(clave, defaultVal = 0) {
+  try {
+    const cfg = await Configuracion.findOne({ where: { clave } });
+    if (!cfg) return defaultVal;
+    const parsed = Number(cfg.valor);
+    return isNaN(parsed) ? defaultVal : parsed;
+  } catch (err) {
+    return defaultVal;
+  }
+}
+
 exports.createOrder = async (req, res) => {
   const t = await sequelize.transaction();
   try {
@@ -20,30 +32,31 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "Debe incluir al menos un producto en el pedido." });
     }
 
-    // Calcular subtotal y validar productos
-    let subtotal = 0.0;
-    const itemsToCreate = [];
+    // Validar límite por comensal
+    const maxPerPerson = await getConfigNumber('max_items_per_person', DEFAULT_MAX_PER_PERSON);
+    const totalItemsCount = items.reduce((s, it) => s + Number(it.cantidad || 0), 0);
+    if (totalItemsCount > Number(personas) * Number(maxPerPerson)) {
+      await t.rollback();
+      return res.status(400).json({ message: `Límite superado: máximo ${maxPerPerson} artículos por persona.` });
+    }
 
+    // Calcular subtotal y preparar items
+    let subtotal = 0;
+    const itemsToCreate = [];
     for (const it of items) {
-      // Se espera cada item: { producto_id, cantidad }
       const productoId = it.producto_id || it.id || it.productoId;
-      const cantidad = Number(it.cantidad ?? it.qty ?? it.cantidad_producto);
+      const cantidad = Number(it.cantidad ?? it.qty ?? 0);
       if (!productoId || !cantidad || cantidad <= 0) {
         await t.rollback();
         return res.status(400).json({ message: "Cada item debe tener producto_id y cantidad > 0." });
       }
-
       const producto = await Producto.findByPk(productoId, { transaction: t });
       if (!producto || producto.disponible === false) {
         await t.rollback();
         return res.status(404).json({ message: `Producto ${productoId} no encontrado o no disponible.` });
       }
-
-      // Precio puede venir como string (DECIMAL en DB)
       const precio = Number(producto.precio);
-      const linea = precio * cantidad;
-      subtotal += linea;
-
+      subtotal += precio * cantidad;
       itemsToCreate.push({
         producto_id: producto.id,
         nombre_producto: producto.nombre_producto,
@@ -52,23 +65,12 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    // Buscar impuesto configurado (porcentaje). Si no existe, 0%.
-    let impuestoPercent = 0;
-    try {
-      const impuestoCfg = await Configuracion.findOne({ where: { clave: 'impuesto' }, transaction: t });
-      if (impuestoCfg && impuestoCfg.valor) {
-        const parsed = Number(impuestoCfg.valor);
-        if (!isNaN(parsed)) impuestoPercent = parsed;
-      }
-    } catch (err) {
-      // si falla la lectura, asumimos 0 pero no abortamos
-      impuestoPercent = 0;
-    }
-
+    // Impuestos (config: clave 'impuesto' => porcentaje)
+    const impuestoPercent = await getConfigNumber('impuesto', 0);
     const impuestos = +(subtotal * (impuestoPercent / 100));
-    let descuentoMonto = 0;
 
-    // Aplicar descuento si se pasa un código
+    // Descuento
+    let descuentoMonto = 0;
     if (descuentoCodigo) {
       const descuento = await Descuento.findOne({ where: { codigo: descuentoCodigo, activo: true }, transaction: t });
       if (!descuento) {
@@ -82,7 +84,6 @@ exports.createOrder = async (req, res) => {
       }
     }
 
-    // Evitar total negativo
     let total = +(subtotal + impuestos - descuentoMonto);
     if (total < 0) total = 0;
 
@@ -96,9 +97,10 @@ exports.createOrder = async (req, res) => {
       total: total.toFixed(2),
       estado: 'pendiente',
       fecha: new Date(),
+      mesa: mesa ?? null // si agregas campo 'mesa' en modelo, guarda aquí
     }, { transaction: t });
 
-    // Crear items asociados al pedido
+    // Crear items
     for (const it of itemsToCreate) {
       await PedidoItem.create({
         pedido_id: nuevoPedido.id,
@@ -111,11 +113,10 @@ exports.createOrder = async (req, res) => {
 
     await t.commit();
 
-    // Devolver el pedido con sus items
+    // Devolver pedido con items
     const pedidoConItems = await Pedido.findByPk(nuevoPedido.id, {
       include: [{ model: PedidoItem }],
     });
-
     return res.status(201).json({ message: "Pedido creado correctamente", pedido: pedidoConItems });
   } catch (error) {
     if (t) await t.rollback();
@@ -124,8 +125,7 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-
-// Listar pedidos (ejemplo: admin)
+// Listar pedidos (admin)
 exports.listOrders = async (req, res) => {
   try {
     const pedidos = await Pedido.findAll({
@@ -137,17 +137,57 @@ exports.listOrders = async (req, res) => {
   }
 };
 
-// Admin: actualizar estado del pedido
+// Pedidos del usuario autenticado
+exports.getMyOrders = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const pedidos = await Pedido.findAll({
+      where: { usuario_id: userId },
+      include: [{ model: PedidoItem }]
+    });
+    res.json(pedidos);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener pedidos del usuario", error });
+  }
+};
+
+// Obtener pedido por id (propietario o admin)
+exports.getOrderById = async (req, res) => {
+  try {
+    const pedido = await Pedido.findByPk(req.params.id, { include: [{ model: PedidoItem }] });
+    if (!pedido) return res.status(404).json({ message: "Pedido no encontrado" });
+    // si no es admin, verificar que sea del usuario
+    if (req.user.role !== 'admin' && pedido.usuario_id !== req.user.id) {
+      return res.status(403).json({ message: "No autorizado para ver este pedido" });
+    }
+    res.json(pedido);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener pedido", error });
+  }
+};
+
+// Actualizar estado del pedido (admin)
 exports.updateOrderStatus = async (req, res) => {
   try {
+    const allowedStates = ['pendiente', 'confirmado', 'en_preparacion', 'listo', 'entregado', 'cancelado'];
+    const { estado } = req.body;
+    if (!estado || !allowedStates.includes(estado)) {
+      return res.status(400).json({ message: `Estado inválido. Estados permitidos: ${allowedStates.join(', ')}` });
+    }
+
     const pedido = await Pedido.findByPk(req.params.id);
     if (!pedido) return res.status(404).json({ message: "Pedido no encontrado" });
 
-    pedido.estado = req.body.estado || pedido.estado;
+    pedido.estado = estado;
     await pedido.save();
 
-    res.json({ message: "Estado de pedido actualizado", pedido });
+    return res.json({ message: "Estado de pedido actualizado", pedido });
   } catch (error) {
-    res.status(500).json({ message: "Error al actualizar estado", error });
+    console.error("Error updateOrderStatus:", error);
+    return res.status(500).json({ message: "Error al actualizar estado", error: error.message || error });
   }
 };
+
+
+
+

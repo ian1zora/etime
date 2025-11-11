@@ -148,6 +148,11 @@ INSERT INTO `configuracion` (`clave`, `valor`) VALUES
 INSERT INTO descuento (codigo, porcentaje, monto_fijo, activo)
 VALUES ('PROMO10', 10, NULL, true);
 
+INSERT INTO configuracion (clave, valor) VALUES
+('impuesto', '21'),
+('max_items_per_person', '4');
+
+
 
 -- ============================================================
 --  FIN DEL SCRIPT
