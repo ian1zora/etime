@@ -9,6 +9,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const configRoutes = require('./routes/configRoutes');
 const errorHandler = require('./middlewares/errorHandler');
+const discountRoutes = require('./routes/discountRoutes');
 
 const app = express();
 app.use(cors());
@@ -20,6 +21,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/settings', configRoutes);
+app.use('/api/discounts', discountRoutes);
+
 
 // endpoint de prueba
 app.get('/', (req, res) => res.json({ ok: true, version: 'backend' }));

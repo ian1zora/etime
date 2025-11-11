@@ -40,7 +40,7 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: `Límite superado: máximo ${maxPerPerson} artículos por persona.` });
     }
 
-    // Calcular subtotal y preparar items
+       // Calcular subtotal y preparar items
     let subtotal = 0;
     const itemsToCreate = [];
     for (const it of items) {
@@ -68,6 +68,7 @@ exports.createOrder = async (req, res) => {
     // Impuestos (config: clave 'impuesto' => porcentaje)
     const impuestoPercent = await getConfigNumber('impuesto', 0);
     const impuestos = +(subtotal * (impuestoPercent / 100));
+
 
     // Descuento
     let descuentoMonto = 0;
@@ -97,7 +98,6 @@ exports.createOrder = async (req, res) => {
       total: total.toFixed(2),
       estado: 'pendiente',
       fecha: new Date(),
-      mesa: mesa ?? null // si agregas campo 'mesa' en modelo, guarda aquí
     }, { transaction: t });
 
     // Crear items
@@ -187,7 +187,3 @@ exports.updateOrderStatus = async (req, res) => {
     return res.status(500).json({ message: "Error al actualizar estado", error: error.message || error });
   }
 };
-
-
-
-
