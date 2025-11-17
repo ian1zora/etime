@@ -135,7 +135,7 @@ INSERT INTO `producto` (`nombre_producto`, `imagen`, `precio`, `categoria_id`) V
 ('Ensalada César', 'ensalada.jpg', 450.00, 1),
 ('Risotto de Hongos', 'risotto.jpg', 1200.00, 2),
 ('Tiramisú', 'tiramisu.jpg', 550.00, 3),
-('Cerveza Artesanal', 'cerveza.jpg', 350.00, 4);
+('Cerveza Artesanal', 'cerveza.jpg', 350.00, 4),
 ('Empanada de carne', 'https://example.com/empanada.jpg', 150.00, 1),
 ('Pizza Mozzarella', 'https://example.com/pizza.jpg', 1200.00, 2),
 ('Flan casero', 'https://example.com/flan.jpg', 450.00, 3),

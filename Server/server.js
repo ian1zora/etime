@@ -1,7 +1,8 @@
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env' });
 const express = require('express');
 const cors = require('cors');
 const { sequelize } = require('./models');
+
 
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes'); 
@@ -30,7 +31,7 @@ app.get('/', (req, res) => res.json({ ok: true, version: 'backend' }));
 // middleware global de manejo de errores (debe ir después de las rutas)
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 
 // Conexión DB y arranque del servidor
 sequelize.authenticate()
