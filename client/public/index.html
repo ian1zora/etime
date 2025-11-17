@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>E-TIME — Landing</title>
+  <link rel="stylesheet" href="../src/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- HEADER -->
+    <header class="site-header">
+      <div class="header-left">
+        <!-- IMAGE: public/assets/images/logo.png -->
+        <img src="../assets/img/logo.png" alt="E-TIME logo" id="logo" />
+        <div class="brand">
+          <h1>E-TIME</h1>
+          <small>el momento perfecto para disfrutar</small>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <nav class="main-nav">
+          <a href="#catalog">Catálogo</a>
+          <a href="#about">Sobre nos</a>
+          <a href="#contact">Contactarnos</a>
+        </nav>
+
+        <div class="cart">
+          <button id="cart-btn" aria-label="Carrito">🛒</button>
+          <span id="cart-count" class="cart-count">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-copy">
+        <h2>E-TIME</h2>
+        <p>Realizá tus pedidos de comidas y bebidas de forma simple, aprovechá promociones exclusivas y disfrutá.</p>
+        <div class="hero-actions">
+          <button id="claim-offer" class="btn-green">Reclamar Oferta</button>
+          <a href="#catalog" class="btn-outline">Ver catálogo</a>
+        </div>
+      </div>
+      <div class="hero-image">
+        <!-- IMAGE: public/assets/images/landing-hero.png -->
+        <img src="../assets/img/landing-hero.png" alt="Hero" />
+      </div>
+    </section>
+
+    <!-- CONTROLS (filtros + orden) -->
+    <section class="controls">
+      <div class="categories" id="categories"></div>
+
+      <div class="search-sort">
+        <input id="search" placeholder="Buscar..." />
+        <select id="sort">
+          <option value="default">Ordenar</option>
+          <option value="price-asc">Precio: menor a mayor</option>
+          <option value="price-desc">Precio: mayor a menor</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- CATALOGO -->
+    <main id="catalog" class="catalog">
+      <h3>Catálogo</h3>
+      <div id="products" class="products-grid"></div>
+
+      <div class="pagination" id="pagination"></div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div>© todos los derechos reservados a ian steinmeyer</div>
+      <div class="socials">
+        <!-- ICONS: public/assets/icons/...svg -->
+        <img src="../assets/icons/whatsapp.svg" alt="whatsapp" />
+        <img src="../assets/icons/instagram.svg" alt="instagram" />
+        <img src="../assets/icons/github.svg" alt="github" />
+      </div>
+    </footer>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast" aria-live="polite" hidden></div>
+  </div>
+
+  <script src="../src/app.js"></script>
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <span id="modal-close">&times;</span>
+      <img id="modal-img" />
+      <h2 id="modal-title"></h2>
+      <p id="modal-price"></p>
+      <p id="modal-category"></p>
+    </div>
+  </div>
+  
+  <style>
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .hidden { display: none; }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      max-width: 400px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    #modal-img { width: 100%; border-radius: 10px; margin-bottom: 15px; }
+    #modal-close { cursor: pointer; float:right; font-size: 26px; }
+  </style>
+  
+</body>
+</html>

@@ -23,6 +23,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/settings', configRoutes);
 app.use('/api/discounts', discountRoutes);
+app.use('/uploads', express.static('uploads'));
 
 
 // endpoint de prueba
