@@ -1,12 +1,113 @@
 /* Simple responsive styles. Ajustá colores según Figma */
-:root{
+:root {
   --pink-900: #3b2b2e;
   --pink-700: #e78b86;
   --accent: #8ef58a;
   --bg: #f6c6bf;
   --card-bg: #fff;
   --muted: #6b6b6b;
+
+  /* Nuevos tonos */
+  --pink-500: #f3a9a4;
+  --pink-300: #fbd4d1;
+  --pink-100: #ffefed;
+
+  /* Verde acento expandido */
+  --accent-dark: #5bc95b;
+  --accent-light: #bbffb8;
+
+  /* Acción secundaria (propuesta) */
+  --secondary: #86a5e7;
+
+  /* Derivados secundarios */
+  --secondary-dark: #5677c2;
+  --secondary-light: #b9c9f7;
 }
+
+/* 1. Pink suave */
+.bg-pink-light {
+  background-color: var(--pink-300);
+  color: var(--pink-900);
+}
+.bg-pink-light:hover {
+  background-color: var(--pink-500);
+}
+
+/* 2. Pink intenso */
+.bg-pink-strong {
+  background-color: var(--pink-700);
+  color: #fff;
+}
+.bg-pink-strong:hover {
+  background-color: var(--pink-900);
+}
+
+/* 3. Acento verde */
+.bg-accent {
+  background-color: var(--accent);
+  color: var(--pink-900);
+}
+.bg-accent:hover {
+  background-color: var(--accent-dark);
+  color: #fff;
+}
+
+/* 4. Acento verde oscuro */
+.bg-accent-dark {
+  background-color: var(--accent-dark);
+  color: #fff;
+}
+.bg-accent-dark:hover {
+  background-color: #4aa64a; /* tono más profundo */
+}
+
+/* 5. Secundario azul */
+.bg-secondary {
+  background-color: var(--secondary);
+  color: #fff;
+}
+.bg-secondary:hover {
+  background-color: var(--secondary-dark);
+}
+
+/* 6. Secundario azul oscuro */
+.bg-secondary-dark {
+  background-color: var(--secondary-dark);
+  color: #f0f4ff;
+}
+.bg-secondary-dark:hover {
+  background-color: #3e5d9e; /* un paso más oscuro */
+}
+
+/* 7. Fondo base rosado */
+.bg-base {
+  background-color: var(--bg);
+  color: var(--pink-900);
+}
+.bg-base:hover {
+  background-color: var(--pink-300);
+}
+
+/* 8. Tarjeta */
+.bg-card {
+  background-color: var(--card-bg);
+  color: var(--muted);
+}
+.bg-card:hover {
+  background-color: #f3f3f3;
+}
+
+/* 9. Gris suave */
+.bg-muted-light {
+  background-color: #e2e2e2;
+  color: var(--pink-900);
+}
+.bg-muted-light:hover {
+  background-color: #cecece;
+}
+
+
+
 
 *{box-sizing:border-box}
 body{margin:0;font-family: 'Segoe UI', Roboto, Arial, sans-serif;background:var(--bg);color:var(--pink-900)}
@@ -161,3 +262,29 @@ body{margin:0;font-family: 'Segoe UI', Roboto, Arial, sans-serif;background:var(
   .cart-panel { max-width:100%; width:100%; }
   .cart-item img{ width:56px;height:56px; }
 }
+
+
+
+
+/*estilo botones*/
+button{
+  padding: .5em .75em;
+  border: 0;
+  background-color: var(--accent);
+  color: var(--pink-900);
+  border-radius: .25em;
+  font-weight: 700;
+  font-size: 1em;
+  transition: all .2s ease-in-out;
+}
+button:hover{
+  background-color: #2b8f5d;
+  color: white;
+  box-shadow: 0 .5em .5em -.25em  #0009;
+  cursor: pointer;
+}
+/* 
+.details-btn{
+  background-color: var(--secondary);
+  color: var(--secondary-dark);
+} */

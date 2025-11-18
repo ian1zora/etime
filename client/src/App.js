@@ -131,8 +131,8 @@ function renderProducts() {
         <h4>${p.name}</h4>
         <div class="price">$${p.price.toFixed(2)}</div>
         <div class="product-footer">
-          <button class="add-btn">Añadir al carrito</button>
-          <button class="details-btn">Ver detalles</button>
+          <button class="add-btn"><i class="fa-solid fa-plus-circle"></i>Añadir al carrito</button>
+          <button class="details-btn bg-secondary-dark"><i class="fa-solid fa-eye"></i></button>
           <div class="cat">${p.category}</div>
         </div>
       </div>
