@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido Confirmado - ETime Restaurant</title>
+    <link rel="stylesheet" href="../src/styles.css" />
+    <style>
+        .confirmation-container { max-width: 800px; margin: 50px auto; padding: 20px; text-align: center; }
+        .success-icon { font-size: 80px; color: #28a745; margin-bottom: 20px; }
+        .order-details { background: #f8f9fa; padding: 30px; border-radius: 10px; margin: 30px 0; text-align: left; }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 5px 0; }
+        .detail-row.total { border-top: 2px solid #ddd; padding-top: 15px; font-weight: bold; font-size: 1.2em; }
+        .btn-home { background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px; }
+        .btn-home:hover { background: #0056b3; }
+        .status-badge { background: #ffc107; color: #212529; padding: 5px 15px; border-radius: 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="confirmation-container">
+        <div class="success-icon">✅</div>
+        <h1>¡Pedido Confirmado!</h1>
+        <p>Tu pedido ha sido procesado exitosamente y está siendo preparado.</p>
+        
+        <div class="order-details" id="order-details">
+            <h3>Detalles del Pedido</h3>
+            <div class="detail-row">
+                <span><strong>Número de Pedido:</strong></span>
+                <span id="order-number">Cargando...</span>
+            </div>
+            <div class="detail-row">
+                <span><strong>Estado:</strong></span>
+                <span><span class="status-badge" id="order-status">Pendiente</span></span>
+            </div>
+            <div class="detail-row">
+                <span><strong>Tiempo Estimado:</strong></span>
+                <span>30-45 minutos</span>
+            </div>
+            
+            <h4 style="margin-top: 25px; margin-bottom: 15px;">Items del Pedido:</h4>
+            <div id="order-items">Cargando items...</div>
+            
+            <div class="detail-row">
+                <span>Subtotal:</span>
+                <span id="order-subtotal">$0.00</span>
+            </div>
+            <div class="detail-row">
+                <span>Descuento:</span>
+                <span id="order-discount">-$0.00</span>
+            </div>
+            <div class="detail-row">
+                <span>Impuestos (21%):</span>
+                <span id="order-tax">$0.00</span>
+            </div>
+            <div class="detail-row total">
+                <span>Total Pagado:</span>
+                <span id="order-total">$0.00</span>
+            </div>
+        </div>
+        
+        <div>
+            <p><strong>¿Necesitas ayuda?</strong></p>
+            <p>Contactanos al: <strong>+54 11 1234-5678</strong></p>
+            <p>Email: <strong>soporte@etime.com</strong></p>
+        </div>
+        
+        <a href="/" class="btn-home">Volver al Inicio</a>
+    </div>
+
+    <script>
+        // Obtener número de pedido de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderNumber = urlParams.get('order');
+        
+        if (orderNumber) {
+            document.getElementById('order-number').textContent = orderNumber;
+            
+            // Cargar detalles del pedido
+            fetch(`/api/orders/${orderNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const order = data.data;
+                        
+                        // Actualizar estado
+                        document.getElementById('order-status').textContent = order.estado.charAt(0).toUpperCase() + order.estado.slice(1);
+                        
+                        // Mostrar items
+                        if (order.items && order.items.length > 0) {
+                            const itemsHtml = order.items.map(item => 
+                                `<div class="detail-row">
+                                    <span>${item.nombre_producto} x${item.cantidad}</span>
+                                    <span>$${item.subtotal}</span>
+                                </div>`
+                            ).join('');
+                            document.getElementById('order-items').innerHTML = itemsHtml;
+                        }
+                        
+                        // Mostrar totales
+                        document.getElementById('order-subtotal').textContent = `$${parseFloat(order.subtotal).toFixed(2)}`;
+                        document.getElementById('order-discount').textContent = `-$${parseFloat(order.descuento).toFixed(2)}`;
+                        document.getElementById('order-tax').textContent = `$${parseFloat(order.impuestos).toFixed(2)}`;
+                        document.getElementById('order-total').textContent = `$${parseFloat(order.total).toFixed(2)}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error cargando detalles del pedido:', error);
+                });
+        } else {
+            document.getElementById('order-details').innerHTML = '<p>No se encontró información del pedido.</p>';
+        }
+    </script>
+</body>
+</html>

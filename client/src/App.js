@@ -2,7 +2,7 @@
 
 let products = [];
 
-const CATEGORIES = ['Todas','Entradas','Platos Principales','Postres','Bebidas'];
+let CATEGORIES = ['Todas'];
 const PAGE_SIZE = 6;
 const TAX_RATE = 0.21; // 21%
 
@@ -50,23 +50,37 @@ async function init() {
   if (cartBtn) cartBtn.addEventListener('click', openCart);
 
   try {
-    const res = await fetch('http://localhost:5000/api/products');
-    const data = await res.json();
+    // Cargar categorías
+    const catRes = await fetch('/api/categories');
+    const catData = await catRes.json();
+    if (catData.success) {
+      CATEGORIES = ['Todas', ...catData.data.map(c => c.nombre)];
+    }
 
-    products = data.map(p => ({
-      id: p.id,
-      name: p.nombre_producto,
-      image: (p.imagen || '').startsWith('http') || (p.imagen || '').startsWith('data:')
-             ? p.imagen
-             : `/uploads/${p.imagen}`,
-      price: Number(p.precio),
-      category: p.Categorium?.nombre || 'Sin categoría'
-    }));
+    // Cargar productos
+    const res = await fetch('/api/products');
+    const data = await res.json();
+    if (data.success) {
+      products = data.data.map(p => ({
+        id: p.id,
+        name: p.nombre_producto,
+        image: (p.imagen || '').startsWith('http') || (p.imagen || '').startsWith('data:')
+               ? p.imagen
+               : `/uploads/${p.imagen}`,
+        price: Number(p.precio),
+        category: getCategoryName(p.categoria_id)
+      }));
+    }
 
     filtered = products.slice();
   } catch (err) {
-    console.error('Error cargando productos desde API:', err);
+    console.error('Error cargando datos desde API:', err);
     products = []; filtered = [];
+  }
+
+  function getCategoryName(catId) {
+    const catNames = ['', 'Entradas', 'Platos Principales', 'Postres', 'Bebidas'];
+    return catNames[catId] || 'Sin categoría';
   }
 
   renderCategories();
@@ -414,10 +428,8 @@ function handleCheckout() {
   // persistir por si el checkout necesita leer
   localStorage.setItem('lastOrderSummary', JSON.stringify(orderSummary));
 
-  // redirigir (si tenés ruta de checkout)
-  // window.location.href = '/checkout';
-  // por ahora mostramos confirmación simple
-  alert('Proceder al pago (ejemplo). Resumen guardado en localStorage.');
+  // Redirigir al checkout
+  window.location.href = '/checkout.html';
   closeCart();
 }
 
