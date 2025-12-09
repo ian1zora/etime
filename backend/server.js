@@ -80,7 +80,11 @@ app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
     return next();
   }
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  // En desarrollo, servir desde public; en producción, desde dist
+  const indexPath = process.env.NODE_ENV === 'production' 
+    ? path.join(__dirname, '../client/dist/index.html')
+    : path.join(__dirname, '../client/public/index.html');
+  res.sendFile(indexPath);
 });
 
 // API info endpoint
