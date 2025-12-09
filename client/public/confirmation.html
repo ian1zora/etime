@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedido Confirmado - ETime Restaurant</title>
-    <link rel="stylesheet" href="../src/styles.css" />
+    <link rel="stylesheet" href="/src/styles.css" />
     <style>
-        .confirmation-container { max-width: 800px; margin: 50px auto; padding: 20px; text-align: center; }
-        .success-icon { font-size: 80px; color: #28a745; margin-bottom: 20px; }
+        body { background: var(--bg); }
+        .confirmation-container { max-width: 800px; margin: 50px auto; padding: 20px; text-align: center; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .success-icon { font-size: 80px; margin-bottom: 20px; }
         .order-details { background: #f8f9fa; padding: 30px; border-radius: 10px; margin: 30px 0; text-align: left; }
         .detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 5px 0; }
-        .detail-row.total { border-top: 2px solid #ddd; padding-top: 15px; font-weight: bold; font-size: 1.2em; }
-        .btn-home { background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px; }
-        .btn-home:hover { background: #0056b3; }
+        .detail-row.total { border-top: 2px solid #ddd; padding-top: 15px; font-weight: bold; font-size: 1.2em; margin-top: 15px; }
+        .btn-home { background: var(--accent); color: var(--pink-900); padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; margin-top: 20px; font-weight: 700; }
+        .btn-home:hover { background: var(--accent-dark); color: white; }
         .status-badge { background: #ffc107; color: #212529; padding: 5px 15px; border-radius: 20px; font-size: 14px; }
     </style>
 </head>
@@ -22,7 +23,7 @@
         <h1>¡Pedido Confirmado!</h1>
         <p>Tu pedido ha sido procesado exitosamente y está siendo preparado.</p>
         
-        <div class="order-details" id="order-details">
+        <div class="order-details">
             <h3>Detalles del Pedido</h3>
             <div class="detail-row">
                 <span><strong>Número de Pedido:</strong></span>
@@ -30,7 +31,7 @@
             </div>
             <div class="detail-row">
                 <span><strong>Estado:</strong></span>
-                <span><span class="status-badge" id="order-status">Pendiente</span></span>
+                <span><span class="status-badge">Pendiente</span></span>
             </div>
             <div class="detail-row">
                 <span><strong>Tiempo Estimado:</strong></span>
@@ -68,44 +69,25 @@
     </div>
 
     <script>
-        // Obtener número de pedido de la URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderNumber = urlParams.get('order');
+        const lastOrder = JSON.parse(localStorage.getItem('lastOrder') || 'null');
         
-        if (orderNumber) {
-            document.getElementById('order-number').textContent = orderNumber;
+        if (lastOrder) {
+            document.getElementById('order-number').textContent = `#${lastOrder.orderNumber}`;
             
-            // Cargar detalles del pedido
-            fetch(`/api/orders/${orderNumber}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const order = data.data;
-                        
-                        // Actualizar estado
-                        document.getElementById('order-status').textContent = order.estado.charAt(0).toUpperCase() + order.estado.slice(1);
-                        
-                        // Mostrar items
-                        if (order.items && order.items.length > 0) {
-                            const itemsHtml = order.items.map(item => 
-                                `<div class="detail-row">
-                                    <span>${item.nombre_producto} x${item.cantidad}</span>
-                                    <span>$${item.subtotal}</span>
-                                </div>`
-                            ).join('');
-                            document.getElementById('order-items').innerHTML = itemsHtml;
-                        }
-                        
-                        // Mostrar totales
-                        document.getElementById('order-subtotal').textContent = `$${parseFloat(order.subtotal).toFixed(2)}`;
-                        document.getElementById('order-discount').textContent = `-$${parseFloat(order.descuento).toFixed(2)}`;
-                        document.getElementById('order-tax').textContent = `$${parseFloat(order.impuestos).toFixed(2)}`;
-                        document.getElementById('order-total').textContent = `$${parseFloat(order.total).toFixed(2)}`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error cargando detalles del pedido:', error);
-                });
+            if (lastOrder.items && lastOrder.items.length > 0) {
+                const itemsHtml = lastOrder.items.map(item => 
+                    `<div class="detail-row">
+                        <span>${item.name} x${item.qty}</span>
+                        <span>$${(item.price * item.qty).toFixed(2)}</span>
+                    </div>`
+                ).join('');
+                document.getElementById('order-items').innerHTML = itemsHtml;
+            }
+            
+            document.getElementById('order-subtotal').textContent = `$${lastOrder.subtotal.toFixed(2)}`;
+            document.getElementById('order-discount').textContent = `-$${lastOrder.discount.toFixed(2)}`;
+            document.getElementById('order-tax').textContent = `$${lastOrder.tax.toFixed(2)}`;
+            document.getElementById('order-total').textContent = `$${lastOrder.total.toFixed(2)}`;
         } else {
             document.getElementById('order-details').innerHTML = '<p>No se encontró información del pedido.</p>';
         }

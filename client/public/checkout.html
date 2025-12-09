@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - ETime Restaurant</title>
-    <link rel="stylesheet" href="../src/styles.css" />
     <style>
-        .checkout-container { max-width: 1200px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr 400px; gap: 30px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f6c6bf; padding: 20px; }
+        .checkout-container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 400px; gap: 30px; }
         .checkout-form { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .form-section { margin-bottom: 30px; }
         .form-section h3 { margin-bottom: 15px; color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
@@ -14,16 +15,19 @@
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .order-summary { background: #f8f9fa; padding: 20px; border-radius: 10px; height: fit-content; }
-        .summary-item { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .summary-total { border-top: 2px solid #ddd; padding-top: 10px; font-weight: bold; font-size: 1.2em; }
-        .btn-primary { background: #007bff; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
-        .btn-primary:hover { background: #0056b3; }
+        .order-summary { background: white; padding: 20px; border-radius: 10px; height: fit-content; }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 8px 0; }
+        .summary-total { border-top: 2px solid #ddd; padding-top: 10px; margin-top: 10px; font-weight: bold; font-size: 1.2em; }
+        .btn-primary { background: #e74c3c; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
+        .btn-primary:hover { background: #c0392b; }
         .error { color: #dc3545; font-size: 14px; margin-top: 5px; }
-        .payment-methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
-        .payment-method { border: 2px solid #ddd; padding: 15px; text-align: center; cursor: pointer; border-radius: 5px; }
-        .payment-method.selected { border-color: #007bff; background: #e7f3ff; }
-        .loading { display: none; text-align: center; padding: 20px; }
+        .payment-methods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+        .payment-method { border: 3px solid #ddd; padding: 20px 10px; text-align: center; cursor: pointer; border-radius: 8px; transition: all 0.2s; background: white; }
+        .payment-method:hover { border-color: #007bff; transform: translateY(-2px); }
+        .payment-method.selected { border-color: #007bff; background: #e7f3ff; transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,123,255,0.4); }
+        .payment-method div:first-child { font-size: 32px; margin-bottom: 8px; }
+        #card-section { display: none; }
+        @media(max-width: 768px) { .checkout-container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -32,122 +36,96 @@
             <h2>Finalizar Compra</h2>
             
             <form id="checkout-form">
-                <!-- Información de Envío -->
                 <div class="form-section">
                     <h3>Información de Envío</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="firstName">Nombre *</label>
-                            <input type="text" id="firstName" name="firstName" required>
-                            <div class="error" id="firstName-error"></div>
+                            <label>Nombre *</label>
+                            <input type="text" id="firstName" required>
                         </div>
                         <div class="form-group">
-                            <label for="lastName">Apellido *</label>
-                            <input type="text" id="lastName" name="lastName" required>
-                            <div class="error" id="lastName-error"></div>
+                            <label>Apellido *</label>
+                            <input type="text" id="lastName" required>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="email">Email *</label>
-                        <input type="email" id="email" name="email" required>
-                        <div class="error" id="email-error"></div>
+                        <label>Teléfono *</label>
+                        <input type="tel" id="phone" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="phone">Teléfono *</label>
-                        <input type="tel" id="phone" name="phone" required>
-                        <div class="error" id="phone-error"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="address">Dirección *</label>
-                        <input type="text" id="address" name="address" required>
-                        <div class="error" id="address-error"></div>
+                        <label>Dirección *</label>
+                        <input type="text" id="address" required>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="city">Ciudad *</label>
-                            <input type="text" id="city" name="city" required>
-                            <div class="error" id="city-error"></div>
+                            <label>Ciudad *</label>
+                            <input type="text" id="city" required>
                         </div>
                         <div class="form-group">
-                            <label for="postalCode">Código Postal *</label>
-                            <input type="text" id="postalCode" name="postalCode" required>
-                            <div class="error" id="postalCode-error"></div>
+                            <label>Código Postal *</label>
+                            <input type="text" id="postalCode" required>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="notes">Notas adicionales</label>
-                        <input type="text" id="notes" name="notes" placeholder="Ej: Piso, departamento, referencias">
+                        <label>Notas adicionales</label>
+                        <input type="text" id="notes" placeholder="Ej: Piso, departamento">
                     </div>
                 </div>
 
-                <!-- Método de Pago -->
                 <div class="form-section">
-                    <h3>Método de Pago</h3>
+                    <h3>Método de Pago *</h3>
                     <div class="payment-methods">
-                        <div class="payment-method" data-method="efectivo">
+                        <div class="payment-method" onclick="selectPayment('efectivo', this)">
                             <div>💵</div>
                             <div>Efectivo</div>
                         </div>
-                        <div class="payment-method" data-method="tarjeta">
+                        <div class="payment-method" onclick="selectPayment('tarjeta', this)">
                             <div>💳</div>
                             <div>Tarjeta</div>
                         </div>
-                        <div class="payment-method" data-method="transferencia">
+                        <div class="payment-method" onclick="selectPayment('transferencia', this)">
                             <div>🏦</div>
                             <div>Transferencia</div>
                         </div>
-                        <div class="payment-method" data-method="mercadopago">
+                        <div class="payment-method" onclick="selectPayment('mercadopago', this)">
                             <div>📱</div>
                             <div>MercadoPago</div>
                         </div>
                     </div>
-                    <input type="hidden" id="paymentMethod" name="paymentMethod" required>
-                    <div class="error" id="paymentMethod-error"></div>
+                    <input type="hidden" id="paymentMethod" required>
+                    <div class="error" id="payment-error"></div>
                 </div>
 
-                <!-- Información de Tarjeta (solo si selecciona tarjeta) -->
-                <div class="form-section" id="card-section" style="display: none;">
+                <div class="form-section" id="card-section">
                     <h3>Información de Tarjeta</h3>
                     <div class="form-group">
-                        <label for="cardNumber">Número de Tarjeta *</label>
-                        <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456">
-                        <div class="error" id="cardNumber-error"></div>
+                        <label>Número de Tarjeta *</label>
+                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456">
                     </div>
-                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="expiryDate">Fecha de Expiración *</label>
-                            <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/AA">
-                            <div class="error" id="expiryDate-error"></div>
+                            <label>Expiración *</label>
+                            <input type="text" id="expiryDate" placeholder="MM/AA">
                         </div>
                         <div class="form-group">
-                            <label for="cvv">CVV *</label>
-                            <input type="text" id="cvv" name="cvv" placeholder="123">
-                            <div class="error" id="cvv-error"></div>
+                            <label>CVV *</label>
+                            <input type="text" id="cvv" placeholder="123">
                         </div>
                     </div>
-                    
                     <div class="form-group">
-                        <label for="cardName">Nombre en la Tarjeta *</label>
-                        <input type="text" id="cardName" name="cardName">
-                        <div class="error" id="cardName-error"></div>
+                        <label>Nombre en Tarjeta *</label>
+                        <input type="text" id="cardName">
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary" id="submit-btn">Confirmar Pedido</button>
+                <button type="submit" class="btn-primary">Confirmar Pedido</button>
             </form>
-
-            <div class="loading" id="loading">
-                <p>Procesando pedido...</p>
-            </div>
         </div>
 
-        <!-- Resumen del Pedido -->
         <div class="order-summary">
             <h3>Resumen del Pedido</h3>
             <div id="order-items"></div>
@@ -168,14 +146,91 @@
                 <span>Total:</span>
                 <span id="summary-total">$0.00</span>
             </div>
-            
-            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
-                <p><strong>Tiempo estimado:</strong> 30-45 minutos</p>
-                <p><strong>Personas:</strong> <span id="summary-people">1</span></p>
-            </div>
         </div>
     </div>
 
-    <script src="../src/checkout.js"></script>
+    <script>
+        let selectedPayment = null;
+        let orderData = {};
+
+        function selectPayment(method, element) {
+            document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedPayment = method;
+            document.getElementById('paymentMethod').value = method;
+            document.getElementById('payment-error').textContent = '';
+            
+            const cardSection = document.getElementById('card-section');
+            if (method === 'tarjeta') {
+                cardSection.style.display = 'block';
+            } else {
+                cardSection.style.display = 'none';
+            }
+        }
+
+        function loadOrderSummary() {
+            const orderSummary = JSON.parse(localStorage.getItem('lastOrderSummary') || 'null');
+            const discount = JSON.parse(localStorage.getItem('discount') || '{"code":null,"percent":0}');
+            
+            if (!orderSummary || !orderSummary.items || orderSummary.items.length === 0) {
+                document.getElementById('order-items').innerHTML = '<p style="color:#999;padding:10px 0;">No hay items</p>';
+                return;
+            }
+
+            let subtotal = 0;
+            let itemsHtml = '';
+
+            orderSummary.items.forEach(item => {
+                const price = parseFloat(item.price) || 0;
+                const qty = parseInt(item.qty) || 0;
+                const total = price * qty;
+                subtotal += total;
+                itemsHtml += `<div class="summary-item"><span>${item.name} x${qty}</span><span>$${total.toFixed(2)}</span></div>`;
+            });
+
+            document.getElementById('order-items').innerHTML = itemsHtml;
+
+            const discountAmount = subtotal * (discount.percent / 100);
+            const taxable = subtotal - discountAmount;
+            const tax = taxable * 0.21;
+            const total = taxable + tax;
+
+            document.getElementById('summary-subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('summary-discount').textContent = `-$${discountAmount.toFixed(2)}`;
+            document.getElementById('summary-tax').textContent = `$${tax.toFixed(2)}`;
+            document.getElementById('summary-total').textContent = `$${total.toFixed(2)}`;
+
+            orderData = { items: orderSummary.items, subtotal, discount: discountAmount, tax, total, discountCode: discount.code };
+        }
+
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!selectedPayment) {
+                document.getElementById('payment-error').textContent = 'Selecciona un método de pago';
+                return;
+            }
+
+            const orderNumber = Math.floor(Math.random() * 100000);
+            localStorage.setItem('lastOrder', JSON.stringify({
+                orderNumber,
+                ...orderData,
+                customer: {
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    phone: document.getElementById('phone').value
+                },
+                payment: { method: selectedPayment }
+            }));
+
+            localStorage.removeItem('cart');
+            localStorage.removeItem('discount');
+            localStorage.removeItem('lastOrderSummary');
+            
+            window.location.href = '/confirmation.html';
+        });
+
+        loadOrderSummary();
+    </script>
 </body>
 </html>
