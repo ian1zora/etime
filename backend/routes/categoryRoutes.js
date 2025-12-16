@@ -6,11 +6,11 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const categorias = await Categoria.findAll({
-      where: { activo: true },
-      order: [['orden_display', 'ASC'], ['nombre', 'ASC']]
+      order: [['nombre', 'ASC']]
     });
     res.json({ success: true, data: categorias });
   } catch (error) {
+    console.error('Error categorías:', error);
     res.status(500).json({ success: false, message: 'Error obteniendo categorías' });
   }
 });
