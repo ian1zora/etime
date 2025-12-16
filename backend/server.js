@@ -18,9 +18,9 @@ const errorHandler = require('./middlewares/errorHandler');
 const app = express();
 
 // Middlewares de seguridad
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:5500'],
+  origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:5500', 'http://localhost:5000'],
   credentials: true
 }));
 
@@ -52,9 +52,9 @@ app.use('/api/discounts', discountRoutes);
 
 // Servir archivos estáticos
 app.use('/uploads', express.static('uploads'));
-app.use(express.static('../client/public'));
 app.use('/assets', express.static('../client/assets'));
 app.use('/src', express.static('../client/src'));
+app.use(express.static('../client/dist'));
 
 // Endpoint de salud
 app.get('/health', (req, res) => {
@@ -66,19 +66,25 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Servir la página principal
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/public/index.html'));
-});
-
-// Servir página de checkout
+// Servir checkout y confirmation desde public
 app.get('/checkout.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/public/checkout.html'));
 });
 
-// Servir página de confirmación
 app.get('/confirmation.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/public/confirmation.html'));
+});
+
+// Servir la aplicación React
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+    return next();
+  }
+  // En desarrollo, servir desde public; en producción, desde dist
+  const indexPath = process.env.NODE_ENV === 'production' 
+    ? path.join(__dirname, '../client/dist/index.html')
+    : path.join(__dirname, '../client/public/index.html');
+  res.sendFile(indexPath);
 });
 
 // API info endpoint
